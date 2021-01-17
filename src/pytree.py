@@ -6,6 +6,7 @@ from pathlib import Path
 @attr.s(auto_attribs=True, frozen=True)
 class TreeSymbols:
     """Four character components to draw tree diagram."""
+
     void = "    "
     skip = "│   "
     item = "├── "
@@ -17,9 +18,13 @@ class PyTree:
     Implementation of unix command `tree` (modified version of this SO answer:
     https://stackoverflow.com/a/59109706/5400084).
     """
+
     @classmethod
     def from_path(
-        cls, root_dir_path: Path, max_depth: int = -1, ignore_files: bool = False,
+        cls,
+        root_dir_path: Path,
+        max_depth: int = -1,
+        ignore_files: bool = False,
     ) -> Iterator[str]:
         """
         Recursively generate an ascii directory tree structure line by line for a given
@@ -63,7 +68,7 @@ class PyTree:
             )
             pointers = (len(contents) - 1) * [TreeSymbols.item] + [TreeSymbols.last]
 
-            for pointer, content in zip(pointers, contents):
+            for pointer, content in zip(pointers, sorted(contents)):
                 # Recursively collect contents of subdirectories
                 if content.is_dir():
                     yield prefix + pointer + content.name
@@ -85,8 +90,10 @@ class PyTree:
         yield from inner(root_dir_path, depth=max_depth)
 
         # Yield counts
+        yield ""
         yield f"Total directories: {directories}"
         yield f"Total files: {files}" if not ignore_files else ""
+        yield ""
 
 
 if __name__ == "__main__":
