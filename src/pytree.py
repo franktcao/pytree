@@ -1,5 +1,15 @@
+import attr
 from typing import Iterator
 from pathlib import Path
+
+
+@attr.s(auto_attribs=True, frozen=True)
+class TreeSymbols:
+    """Four character components to draw tree diagram."""
+    void = "    "
+    skip = "│   "
+    item = "├── "
+    last = "└── "
 
 
 class PyTree:
@@ -7,13 +17,6 @@ class PyTree:
     Implementation of unix command `tree` (modified version of this SO answer:
     https://stackoverflow.com/a/59109706/5400084).
     """
-
-    # Tree components:
-    space = "    "
-    branch = "│   "
-    tee = "├── "
-    last = "└── "
-
     @classmethod
     def from_path(
         cls, root_dir_path: Path, max_depth: int = -1, ignore_files: bool = False,
@@ -38,7 +41,16 @@ class PyTree:
         yield root_dir_path.name
 
         def inner(current_level: Path, prefix: str = "", depth=-1) -> None:
-            """Yield current level's contents."""
+            """
+            Yield current level's contents.
+
+            :param current_level:
+                Current level to collect contents
+            :param prefix:
+                Characters to append to the beginning of each item
+            :param depth:
+                Counter to keep track of recursion depth
+            """
             nonlocal files, directories
             if depth == 0:
                 return
@@ -49,14 +61,18 @@ class PyTree:
                 if ignore_files
                 else list(current_level.iterdir())
             )
-            pointers = (len(contents) - 1) * [cls.tee] + [cls.last]
+            pointers = (len(contents) - 1) * [TreeSymbols.item] + [TreeSymbols.last]
 
             for pointer, content in zip(pointers, contents):
                 # Recursively collect contents of subdirectories
                 if content.is_dir():
                     yield prefix + pointer + content.name
                     directories += 1
-                    extension = cls.branch if pointer == cls.tee else cls.space
+                    extension = (
+                        TreeSymbols.skip
+                        if pointer == TreeSymbols.item
+                        else TreeSymbols.void
+                    )
                     yield from inner(
                         content, prefix=prefix + extension, depth=depth - 1
                     )
