@@ -99,7 +99,8 @@ class PyTree:
         yield ""
 
 
-if __name__ == "__main__":
+# Not covered: Simple example to run
+if __name__ == "__main__":  # pragma: no cover
     """Simple demonstration."""
     my_path = Path(os.getcwd()).parent
     my_tree = PyTree().from_path(root_dir_path=my_path, max_depth=3, ignore_files=False)
