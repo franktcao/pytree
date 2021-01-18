@@ -58,7 +58,6 @@ class TestPyTreeFromPath:
             └── sub_2
             
             Total directories: 4
-            
             """
         )
 

@@ -1,6 +1,8 @@
-import attr
-from typing import Iterator
 from pathlib import Path
+from typing import Iterator
+
+import attr
+import os
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -41,9 +43,6 @@ class PyTree:
         """
         files = 0
         directories = 0
-
-        # Start with yielding the root
-        yield root_dir_path.name
 
         def inner(current_level: Path, prefix: str = "", depth=-1) -> None:
             """
@@ -86,18 +85,22 @@ class PyTree:
                     yield prefix + pointer + content.name
                     files += 1
 
+        # Start with yielding the root
+        yield root_dir_path.name
+
         # Recursively yield results from each subdirectory
         yield from inner(root_dir_path, depth=max_depth)
 
         # Yield counts
         yield ""
         yield f"Total directories: {directories}"
-        yield f"Total files: {files}" if not ignore_files else ""
+        if not ignore_files:
+            yield f"Total files: {files}"
         yield ""
 
 
 if __name__ == "__main__":
     """Simple demonstration."""
-    my_path = Path("/Users/franktcao/local/workspace/pytree")
-    my_tree = PyTree().from_path(root_dir_path=my_path, max_depth=2, ignore_files=False)
+    my_path = Path(os.getcwd()).parent
+    my_tree = PyTree().from_path(root_dir_path=my_path, max_depth=3, ignore_files=False)
     print("\n".join(my_tree))
